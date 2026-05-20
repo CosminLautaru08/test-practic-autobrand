@@ -6,7 +6,7 @@ export class Product {
   id: number;
 
   @Column({ unique: true })
-  title: string;
+  name: string;
 
   @Column('float')
   price: number;

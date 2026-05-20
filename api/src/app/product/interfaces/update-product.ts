@@ -3,4 +3,7 @@ export interface UpdateProduct {
   price: number;
   description: string;
   imageUrl: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date | null;
 }

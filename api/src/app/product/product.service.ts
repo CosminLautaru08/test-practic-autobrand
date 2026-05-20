@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from './entities/product.entity';
 import { Not, Repository } from 'typeorm';
 import { error } from 'console';
+import { ProductList } from './interfaces/product';
 
 @Injectable()
 export class ProductService {
@@ -13,13 +14,13 @@ export class ProductService {
     private productRepository: Repository<Product>,
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(createProductDto: CreateProductDto): Promise<Product> {
     await this.ensureNameIsUnique(createProductDto.name);
 
     try {
       const product = this.productRepository.create(createProductDto);
 
-      return await this.productRepository.save(product);
+      return this.productRepository.save(product);
     } catch (error) {
       if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
         throw new ConflictException('Product name already exists');
@@ -29,7 +30,30 @@ export class ProductService {
     }
   }
 
-  async findAll(page = 1, limit = 10) {
+  async update(
+    id: number,
+    updateProductDto: UpdateProductDto,
+  ): Promise<Product> {
+    const product = await this.findProduct(id);
+
+    if (updateProductDto.name) {
+      await this.ensureNameIsUnique(updateProductDto.name, id);
+    }
+
+    const updated = Object.assign(product, updateProductDto);
+
+    try {
+      return this.productRepository.save(updated);
+    } catch (error) {
+      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        throw new ConflictException('Product name already exists');
+      }
+
+      throw error;
+    }
+  }
+
+  async findAll(page = 1, limit = 10): Promise<ProductList> {
     const [data, total] = await this.productRepository.findAndCount({
       skip: (page - 1) * limit,
       take: limit,
@@ -46,31 +70,14 @@ export class ProductService {
     };
   }
 
-  findOne(id: number) {
+  async findOne(id: number): Promise<Product> {
     return this.findProduct(id);
   }
 
-  async update(id: number, updateProductDto: UpdateProductDto) {
+  async remove(id: number): Promise<Product> {
     const product = await this.findProduct(id);
-
-    if (updateProductDto.name) {
-      await this.ensureNameIsUnique(updateProductDto.name, id);
-    }
-
-    const updated = Object.assign(product, updateProductDto);
-
-    try {
-      return await this.productRepository.save(updated);
-    } catch (error) {
-      if (error.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-        throw new ConflictException('Product name already exists');
-      }
-
-      throw error;
-    }
-  }
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    await this.productRepository.remove(product);
+    return product;
   }
 
   //#region Private methods
@@ -91,7 +98,7 @@ export class ProductService {
     }
   }
 
-  private async findProduct(id: number) {
+  private async findProduct(id: number): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: { id },
     });

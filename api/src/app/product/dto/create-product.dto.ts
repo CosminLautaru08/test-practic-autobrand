@@ -19,6 +19,5 @@ export class CreateProductDto implements CreateProduct {
   @MaxLength(5000)
   description: string;
   @IsString()
-  @MaxLength(5000)
   imageUrl: string;
 }

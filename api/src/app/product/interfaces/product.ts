@@ -6,7 +6,6 @@ export interface Product {
   imageUrl: string;
   createdAt: Date;
   updatedAt: Date;
-  deletedAt: Date | null;
 }
 
 export interface ProductList {

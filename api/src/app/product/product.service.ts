@@ -2,16 +2,16 @@ import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Product } from './entities/product.entity';
+import { ProductEntity } from './entities/product.entity';
 import { Not, Repository } from 'typeorm';
-import { error } from 'console';
-import { ProductList } from './interfaces/product';
+import { Product, ProductList } from './interfaces/product';
+import { ProductModel } from './models/product.model';
 
 @Injectable()
 export class ProductService {
   constructor(
-    @InjectRepository(Product)
-    private productRepository: Repository<Product>,
+    @InjectRepository(ProductEntity)
+    private productRepository: Repository<ProductEntity>,
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
@@ -80,6 +80,20 @@ export class ProductService {
     return product;
   }
 
+  async upsertFromScraper(product: CreateProductDto): Promise<Product> {
+    const existing = await this.productRepository.findOne({
+      where: { name: product.name },
+    });
+
+    if (existing) {
+      const updated = Object.assign(existing, product);
+      return this.productRepository.save(updated);
+    }
+
+    const newProduct = this.productRepository.create(product);
+    return this.productRepository.save(newProduct);
+  }
+
   //#region Private methods
 
   private async ensureNameIsUnique(
@@ -98,7 +112,7 @@ export class ProductService {
     }
   }
 
-  private async findProduct(id: number): Promise<Product> {
+  private async findProduct(id: number): Promise<ProductModel> {
     const product = await this.productRepository.findOne({
       where: { id },
     });

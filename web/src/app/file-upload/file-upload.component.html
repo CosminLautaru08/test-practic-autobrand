@@ -14,18 +14,15 @@
   <div class="upload-panel__layout">
     <div class="upload-panel__copy">
       <p class="upload-panel__eyebrow">Invoice processing</p>
-      <h2 class="upload-panel__title" id="invoice-upload-title">
-        Upload a PDF invoice and download the CSV result.
-      </h2>
       <p class="upload-panel__description">
         Select a PDF file, send it to the backend, and the generated CSV is
         downloaded automatically.
       </p>
     </div>
 
-    <div class="upload-panel__controls">
+    <div class="upload-panel__controls flex flex-col gap-4">
       <label
-        class="upload-panel__picker"
+        class="upload-panel__picker w-full"
         [class.upload-panel__picker--selected]="selectedFile"
         [class.upload-panel__picker--disabled]="isUploading"
       >
@@ -41,7 +38,7 @@
 
       <button
         type="button"
-        class="button button--primary"
+        class="button button--primary w-full"
         [disabled]="!selectedFile || isUploading"
         (click)="uploadInvoice()"
       >

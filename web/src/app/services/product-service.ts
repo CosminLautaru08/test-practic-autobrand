@@ -1,8 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Product } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
+import { ProductPagination } from '../interfaces/product-pagination';
 
 @Injectable({
   providedIn: 'root',
@@ -12,10 +13,18 @@ export class ProductService {
 
   constructor(private http: HttpClient) {}
 
-  getAll(page: number, limit: number): Observable<ProductList> {
-    return this.http.get<ProductList>(
-      `${this.baseUrl}?page=${page}&limit=${limit}`,
-    );
+  getAll(params: ProductPagination): Observable<ProductList> {
+    let httpParams = new HttpParams();
+
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        httpParams = httpParams.set(key, value.toString());
+      }
+    });
+
+    return this.http.get<ProductList>(this.baseUrl, {
+      params: httpParams,
+    });
   }
 
   getById(id: number): Observable<Product> {

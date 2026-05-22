@@ -3,12 +3,13 @@ import {
   ConflictException,
   Injectable,
 } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto';
+import { FindProductsDto } from './dto/product-pagination';
+import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductEntity } from './entities/product.entity';
 import { CreateProduct } from './interfaces/create-product';
-import { Not, Repository } from 'typeorm';
 import { Product, ProductList } from './interfaces/product';
 import { ProductModel } from './models/product.model';
 
@@ -62,20 +63,32 @@ export class ProductService {
     }
   }
 
-  async findAll(page = 1, limit = 10): Promise<ProductList> {
-    const [data, total] = await this.productRepository.findAndCount({
-      skip: (page - 1) * limit,
-      take: limit,
-      order: {
-        id: 'DESC',
-      },
-    });
+  async findAll(body: FindProductsDto): Promise<ProductList> {
+    const query = this.productRepository.createQueryBuilder('product');
+
+    // body
+    if (body?.name) {
+      query.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
+        name: `%${body.name}%`,
+      });
+    }
+
+    // Sorting
+    const sortField = body?.sortField || 'id';
+    const sortOrder = body?.sortOrder || 'DESC';
+
+    query.orderBy(`product.${sortField}`, sortOrder);
+
+    // Pagination
+    query.skip((body.page - 1) * body.limit).take(body.limit);
+
+    const [data, total] = await query.getManyAndCount();
 
     return {
       data,
       total,
-      page,
-      lastPage: Math.ceil(total / limit),
+      page: body.page,
+      lastPage: Math.ceil(total / body.limit),
     };
   }
 

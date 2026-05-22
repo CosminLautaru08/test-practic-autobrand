@@ -24,7 +24,7 @@
       <div class="hero__stats">
         <article class="stat-card">
           <span class="stat-card__label">Visible now</span>
-          <strong class="stat-card__value">{{ products.length }}</strong>
+          <strong class="stat-card__value">{{ products.length ?? 0 }}</strong>
           <span class="stat-card__hint">Products on this page</span>
         </article>
 
@@ -37,12 +37,35 @@
         <article class="stat-card">
           <span class="stat-card__label">Page</span>
           <strong class="stat-card__value">
-            {{ page }}/{{ displayTotalPages }}
+            {{ page ?? 0 }}/{{ displayTotalPages ?? 0 }}
           </strong>
           <span class="stat-card__hint">Current navigation state</span>
         </article>
       </div>
     </section>
+
+    <div class="hero__filters">
+      <input
+        type="text"
+        placeholder="Search products..."
+        [(ngModel)]="nameFilter"
+        (ngModelChange)="onSearchChange($event)"
+      />
+
+      <button
+        type="button"
+        class="sort-btn"
+        [class.sort-btn--active]="sortField === 'name'"
+        (click)="onSortChange('name')"
+      >
+        Sort by Name
+        <span class="sort-btn__dir">
+          {{ sortOrder }}
+        </span>
+      </button>
+
+      <button type="button" (click)="clearFilters()">Clear</button>
+    </div>
 
     @if (isLoading) {
       <section class="state-panel state-panel--loading" aria-live="polite">
@@ -149,9 +172,11 @@
         </button>
 
         <div>
-          <p class="pagination__label">Page {{ page }} of {{ totalPages }}</p>
+          <p class="pagination__label">
+            Page {{ page ?? 0 }} of {{ totalPages ?? 0 }}
+          </p>
           <span class="pagination__hint">
-            {{ pageStart }}-{{ pageEnd }} shown
+            {{ pageStart ?? 0 }}-{{ pageEnd ?? 0 }} shown
           </span>
         </div>
 

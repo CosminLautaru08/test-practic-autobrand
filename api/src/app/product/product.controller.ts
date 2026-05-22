@@ -1,17 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
-import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { FindProductsDto } from './dto/product-pagination';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Product, ProductList } from './interfaces/product';
+import { ProductService } from './product.service';
 
 @Controller('product')
 export class ProductController {
@@ -23,13 +24,9 @@ export class ProductController {
   }
 
   @Get()
-  findAll(
-    @Query('page') page: string,
-    @Query('limit') limit: string,
-  ): Promise<ProductList> {
-    return this.productService.findAll(Number(page) || 1, Number(limit) || 10);
+  findAll(@Query() query: FindProductsDto): Promise<ProductList> {
+    return this.productService.findAll(query);
   }
-
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Product> {
     return this.productService.findOne(+id);

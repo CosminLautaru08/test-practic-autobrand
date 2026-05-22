@@ -27,6 +27,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private readonly productService = inject(ProductService);
   private toastTimeoutId?: ReturnType<typeof setTimeout>;
   private cdr = inject(ChangeDetectorRef);
+  private searchTimeout?: ReturnType<typeof setTimeout>;
 
   readonly pageSize = 6;
   readonly fallbackImage = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
@@ -51,6 +52,10 @@ export class ProductListComponent implements OnInit, OnDestroy {
   page = 1;
   totalPages = 0;
   totalItems = 0;
+
+  nameFilter = '';
+  sortField: string = '';
+  sortOrder: 'DESC' | 'ASC' = 'DESC';
 
   isLoading = false;
   isSaving = false;
@@ -111,11 +116,20 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.page = targetPage;
     this.isLoading = true;
 
-    this.productService.getAll(this.page, this.pageSize).subscribe({
+    const params = {
+      page: this.page,
+      limit: this.pageSize,
+      name: this.nameFilter || undefined,
+      sortField: this.sortField || undefined,
+      sortOrder: this.sortField ? this.sortOrder : undefined,
+    };
+
+    this.productService.getAll(params).subscribe({
       next: (response: ProductList) => {
         this.products = response.data;
         this.totalPages = response.lastPage;
         this.totalItems = response.total;
+        this.page = response.page;
 
         this.isLoading = false;
 
@@ -124,7 +138,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
           return;
         }
 
-        this.cdr.markForCheck(); // 👈 IMPORTANT
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isLoading = false;
@@ -132,6 +146,41 @@ export class ProductListComponent implements OnInit, OnDestroy {
         this.showToastMessage('Unable to load products.');
       },
     });
+  }
+
+  onSearchChange(value: string): void {
+    clearTimeout(this.searchTimeout);
+
+    this.searchTimeout = setTimeout(() => {
+      this.nameFilter = value;
+      this.loadProducts(1);
+    }, 200);
+  }
+
+  onSortChange(field: string): void {
+    const newOrder =
+      this.sortField === field
+        ? this.sortOrder === 'ASC'
+          ? 'DESC'
+          : 'ASC'
+        : 'ASC';
+
+    this.sortField = field;
+    this.sortOrder = newOrder;
+
+    // only reset page if needed, but avoid redundant reload logic
+    if (this.page !== 1) {
+      this.page = 1;
+    }
+
+    this.loadProducts(this.page);
+  }
+
+  clearFilters(): void {
+    this.nameFilter = '';
+    this.sortField = '';
+    this.sortOrder = 'ASC';
+    this.loadProducts(1);
   }
 
   refreshCurrentPage(): void {

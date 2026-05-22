@@ -48,7 +48,7 @@
 .hero__stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px;
+  gap: 8px;
 }
 
 .stat-card,
@@ -59,7 +59,7 @@
 }
 
 .stat-card {
-  padding: 14px 16px;
+  padding: 16px 12px;
 }
 
 .stat-card__label,
@@ -220,4 +220,134 @@
   font-size: 12px;
   margin-top: 4px;
   margin-left: 4px;
+}
+
+.hero__filters {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Make inputs match stat-card / product-card feel */
+.hero__filters input,
+.hero__filters select {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-strong);
+  font-size: 0.9rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.2s ease;
+  min-width: 180px;
+}
+
+/* Focus state aligned with accent system */
+.hero__filters input:focus,
+.hero__filters select:focus {
+  border-color: var(--accent-strong);
+  box-shadow: 0 0 0 3px rgba(95, 127, 114, 0.15);
+}
+
+/* Placeholder consistency */
+.hero__filters input::placeholder {
+  color: var(--text-soft);
+}
+
+/* Buttons match your existing button language */
+.hero__filters button {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-strong);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Primary action hint (clear/search usability) */
+.hero__filters button:hover {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+}
+
+/* Active press state */
+.hero__filters button:active {
+  transform: scale(0.98);
+}
+
+/* Mobile consistency with your existing breakpoints */
+@media (max-width: 900px) {
+  .hero__filters {
+    margin-top: 12px;
+  }
+
+  .hero__filters input,
+  .hero__filters select {
+    min-width: 140px;
+  }
+}
+
+@media (max-width: 640px) {
+  .hero__filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero__filters input,
+  .hero__filters select,
+  .hero__filters button {
+    width: 100%;
+  }
+}
+
+.sort-btn {
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-strong);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* hover consistent with your system */
+.sort-btn:hover {
+  border-color: var(--accent-strong);
+  color: var(--accent-strong);
+}
+
+/* ACTIVE STATE (important part) */
+.sort-btn--active {
+  border-color: var(--accent-strong);
+  background: rgba(95, 127, 114, 0.12);
+  color: var(--accent-strong);
+}
+
+/* direction badge */
+.sort-btn__dir {
+  display: inline-block;
+  width: 32px; /* keeps ASC/DESC same space */
+  text-align: center;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+/* press feedback */
+.sort-btn:active {
+  transform: scale(0.98);
 }

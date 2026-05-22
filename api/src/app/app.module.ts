@@ -3,6 +3,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { ProductModule } from './product/product.module';
 import { ScheduledTasksModule } from './scheduled-tasks/scheduled-tasks.module';
 import { ScraperModule } from './scraper/scraper.module';
@@ -17,6 +18,7 @@ import { InvoiceModule } from './invoice/invoice.module';
       synchronize: true,
     }),
     ScheduleModule.forRoot(),
+    AuthModule,
     ProductModule,
     ScraperModule,
     ScheduledTasksModule,

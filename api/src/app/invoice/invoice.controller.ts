@@ -5,13 +5,16 @@ import {
   Res,
   UnsupportedMediaTypeException,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { memoryStorage } from 'multer';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { InvoiceService } from './invoice.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller('invoice')
 export class InvoiceController {
   constructor(private readonly invoiceService: InvoiceService) {}

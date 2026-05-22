@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 import { Product } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
 import { ProductPagination } from '../interfaces/product-pagination';
@@ -9,7 +10,7 @@ import { ProductPagination } from '../interfaces/product-pagination';
   providedIn: 'root',
 })
 export class ProductService {
-  private baseUrl = 'http://localhost:3000/api/product';
+  private readonly baseUrl = `${API_BASE_URL}/product`;
 
   constructor(private http: HttpClient) {}
 

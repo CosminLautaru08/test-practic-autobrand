@@ -9,6 +9,7 @@ import {
   inject,
 } from '@angular/core';
 import { finalize } from 'rxjs';
+import { API_BASE_URL } from '../core/api.config';
 
 type UploadFeedbackTone = 'success' | 'error';
 
@@ -22,7 +23,7 @@ type UploadFeedbackTone = 'success' | 'error';
 export class FileUploadComponent implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
-  private readonly uploadUrl = 'http://localhost:3000/api/invoice/upload';
+  private readonly uploadUrl = `${API_BASE_URL}/invoice/upload`;
   private toastTimeoutId?: ReturnType<typeof setTimeout>;
 
   @ViewChild('fileInput') private fileInput?: ElementRef<HTMLInputElement>;
@@ -97,7 +98,9 @@ export class FileUploadComponent implements OnDestroy {
         },
         error: async (error: HttpErrorResponse) => {
           console.error('Invoice upload failed:', error);
-          this.handleUploadFailure(await this.getFriendlyUploadErrorMessage(error));
+          this.handleUploadFailure(
+            await this.getFriendlyUploadErrorMessage(error),
+          );
         },
       });
   }
@@ -116,7 +119,10 @@ export class FileUploadComponent implements OnDestroy {
   }
 
   private isPdfFile(file: File): boolean {
-    return file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    return (
+      file.type === 'application/pdf' ||
+      file.name.toLowerCase().endsWith('.pdf')
+    );
   }
 
   private handleUploadFailure(message: string): void {
@@ -186,18 +192,26 @@ export class FileUploadComponent implements OnDestroy {
       return 'Only PDF invoice files are supported.';
     }
 
-    if (details?.includes('could not be read') || details?.includes('invalid pdf')) {
+    if (
+      details?.includes('could not be read') ||
+      details?.includes('invalid pdf')
+    ) {
       return 'The uploaded file could not be read as a valid PDF invoice.';
     }
 
-    if (details?.includes('no product rows') || details?.includes('no invoice line')) {
+    if (
+      details?.includes('no product rows') ||
+      details?.includes('no invoice line')
+    ) {
       return 'The invoice was uploaded, but no product rows could be extracted from it.';
     }
 
     return 'The invoice could not be processed right now. Please try again.';
   }
 
-  private async extractErrorDetails(error: HttpErrorResponse): Promise<string | null> {
+  private async extractErrorDetails(
+    error: HttpErrorResponse,
+  ): Promise<string | null> {
     const directMessage = this.extractMessageFromPayload(error.error);
     if (directMessage) {
       return directMessage.toLowerCase();
@@ -205,7 +219,9 @@ export class FileUploadComponent implements OnDestroy {
 
     if (error.error instanceof Blob) {
       try {
-        const blobMessage = this.extractMessageFromPayload(await error.error.text());
+        const blobMessage = this.extractMessageFromPayload(
+          await error.error.text(),
+        );
         return blobMessage ? blobMessage.toLowerCase() : null;
       } catch {
         return null;

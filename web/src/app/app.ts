@@ -1,13 +1,12 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { ProductListComponent } from './product-list/product-list.component';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
-  imports: [RouterModule, ProductListComponent],
+  imports: [RouterOutlet],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
 export class App {
-  protected title = 'web';
+  // Root component only hosts the routed application shell.
 }

@@ -1,0 +1,131 @@
+<section
+  class="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 sm:px-6 lg:px-8"
+>
+  <div class="pointer-events-none absolute inset-0">
+    <div class="auth-orb auth-orb--olive"></div>
+    <div class="auth-orb auth-orb--ink"></div>
+  </div>
+
+  <div
+    class="relative grid w-full max-w-5xl gap-6 lg:grid-cols-[1.15fr,0.85fr]"
+  >
+    <section
+      class="hidden rounded-[2rem] border border-white/40 bg-slate-950/90 p-10 text-white shadow-2xl shadow-slate-950/20 backdrop-blur lg:flex lg:flex-col lg:justify-between"
+    >
+      <div class="space-y-6">
+        <span
+          class="inline-flex w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-200"
+        >
+          Autobrand Portal
+        </span>
+
+        <div class="space-y-4">
+          <h1 class="font-['Fraunces'] text-4xl leading-tight text-white">
+            Secure access for product review and invoice processing.
+          </h1>
+          <p class="max-w-lg text-base leading-7 text-slate-300">
+            Authenticate once, keep your session across refreshes, and manage
+            the catalogue from a single protected workspace.
+          </p>
+        </div>
+      </div>
+
+      <dl class="grid grid-cols-2 gap-4 text-sm text-slate-300">
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-[0.25em] text-slate-400">
+            Default user
+          </dt>
+          <dd class="mt-2 text-lg font-semibold text-white">admin</dd>
+        </div>
+        <div class="rounded-3xl border border-white/10 bg-white/5 p-4">
+          <dt class="text-xs uppercase tracking-[0.25em] text-slate-400">
+            Password
+          </dt>
+          <dd class="mt-2 text-lg font-semibold text-white">admin123</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section
+      class="rounded-[2rem] border border-white/50 bg-white/80 p-6 shadow-2xl shadow-slate-900/10 backdrop-blur xl:p-8"
+    >
+      <div class="mb-8 space-y-3">
+        <p
+          class="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-800"
+        >
+          Login
+        </p>
+        <div>
+          <h2 class="font-['Fraunces'] text-3xl text-slate-950">
+            Welcome back
+          </h2>
+          <p class="mt-2 text-sm leading-6 text-slate-600">
+            Use the seeded admin account to access the protected application.
+          </p>
+        </div>
+      </div>
+
+      <form class="space-y-5" [formGroup]="loginForm" (ngSubmit)="submit()">
+        <label class="block space-y-2">
+          <span class="text-sm font-semibold text-slate-700">Username</span>
+          <input
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+            placeholder="admin"
+            class="w-full rounded-2xl border bg-white/80 px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+            [class.border-rose-300]="hasError('username')"
+            [class.border-slate-200]="!hasError('username')"
+          />
+          @if (hasError('username')) {
+            <p class="text-sm text-rose-600">Username is required.</p>
+          }
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-sm font-semibold text-slate-700">Password</span>
+          <input
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+            placeholder="Enter your password"
+            class="w-full rounded-2xl border bg-white/80 px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15"
+            [class.border-rose-300]="hasError('password')"
+            [class.border-slate-200]="!hasError('password')"
+          />
+          @if (hasError('password')) {
+            <p class="text-sm text-rose-600">Password is required.</p>
+          }
+        </label>
+
+        @if (errorMessage) {
+          <div
+            class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700"
+            role="alert"
+          >
+            {{ errorMessage }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="isSubmitting"
+        >
+          {{ isSubmitting ? 'Signing in...' : 'Sign in' }}
+        </button>
+      </form>
+
+      <div
+        class="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-900"
+      >
+        <p class="font-semibold">Quick start credentials</p>
+        <p class="mt-1 text-emerald-800">
+          <span class="font-semibold">admin</span>
+          /
+          <span class="font-semibold">admin123</span>
+        </p>
+      </div>
+    </section>
+  </div>
+</section>

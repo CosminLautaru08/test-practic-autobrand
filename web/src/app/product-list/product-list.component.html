@@ -1,0 +1,291 @@
+<div class="catalog">
+  @if (showToast) {
+    <aside class="catalog-toast" aria-live="polite" role="status">
+      <span class="catalog-toast__dot"></span>
+      <span>{{ toastMessage }}</span>
+    </aside>
+  }
+
+  <div class="catalog__shell">
+    <section class="hero">
+      <div class="hero__copy">
+        <p class="hero__eyebrow">Product inventory</p>
+      </div>
+
+      <div class="hero__stats">
+        <article class="stat-card">
+          <span class="stat-card__label">Visible now</span>
+          <strong class="stat-card__value">{{ products.length }}</strong>
+          <span class="stat-card__hint">Products on this page</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">Inventory</span>
+          <strong class="stat-card__value">{{ totalItems }}</strong>
+          <span class="stat-card__hint">Items stored in the database</span>
+        </article>
+
+        <article class="stat-card">
+          <span class="stat-card__label">Page</span>
+          <strong class="stat-card__value">
+            {{ page }}/{{ displayTotalPages }}
+          </strong>
+          <span class="stat-card__hint">Current navigation state</span>
+        </article>
+      </div>
+    </section>
+
+    @if (isLoading) {
+      <section class="state-panel state-panel--loading" aria-live="polite">
+        <div class="state-panel__pulse" aria-hidden="true"></div>
+        <h2>Loading products</h2>
+        <p>Fetching the latest catalogue page.</p>
+      </section>
+    } @else if (!hasProducts) {
+      <section class="state-panel">
+        <h2>No products available</h2>
+        <p>
+          When new products are imported, they will appear here for review and
+          editing.
+        </p>
+        <div class="modal__actions">
+          <button
+            type="button"
+            class="button button--primary"
+            (click)="refreshCurrentPage()"
+          >
+            Try again
+          </button>
+        </div>
+      </section>
+    } @else {
+      <section class="product-grid" aria-label="Product list">
+        @for (product of products; track product.id) {
+          <article class="product-card">
+            <div class="product-card__media">
+              <img
+                class="product-card__image"
+                [src]="product.imageUrl || fallbackImage"
+                [alt]="product.name"
+                loading="lazy"
+                decoding="async"
+                (error)="handleImageError($event)"
+              />
+            </div>
+
+            <div class="product-card__body">
+              <div class="product-card__header">
+                <div>
+                  <p class="product-card__eyebrow">Catalog product</p>
+                  <h2 class="product-card__title">{{ product.name }}</h2>
+                </div>
+
+                <p class="product-card__price">
+                  {{ product.price | currency: 'EUR' : 'symbol' : '1.0-2' }}
+                </p>
+              </div>
+
+              <p class="product-card__description">
+                {{
+                  product.description ||
+                    'No description has been added for this product yet.'
+                }}
+              </p>
+
+              <dl class="product-card__meta">
+                <div>
+                  <dt>Updated</dt>
+                  <dd>{{ product.updatedAt | date: 'mediumDate' }}</dd>
+                </div>
+
+                <div>
+                  <dt>Status</dt>
+                  <dd>Ready to review</dd>
+                </div>
+              </dl>
+
+              <div class="product-card__actions">
+                <button
+                  type="button"
+                  class="button button--primary"
+                  (click)="openEdit(product)"
+                >
+                  Edit details
+                </button>
+
+                <button
+                  type="button"
+                  class="button button--danger"
+                  (click)="openDeleteModal(product.id)"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </article>
+        }
+      </section>
+    }
+
+    @if (displayTotalPages > 1) {
+      <nav class="pagination" aria-label="Pagination">
+        <button
+          type="button"
+          class="button button--ghost"
+          (click)="prevPage()"
+          [disabled]="!canGoToPreviousPage"
+        >
+          Previous
+        </button>
+
+        <div>
+          <p class="pagination__label">Page {{ page }} of {{ totalPages }}</p>
+          <span class="pagination__hint">
+            {{ pageStart }}-{{ pageEnd }} shown
+          </span>
+        </div>
+
+        <button
+          type="button"
+          class="button button--ghost"
+          (click)="nextPage()"
+          [disabled]="!canGoToNextPage"
+        >
+          Next
+        </button>
+      </nav>
+    }
+  </div>
+</div>
+
+@if (isEditModalOpen && selectedProduct) {
+  <div class="modal-backdrop" (click)="closeEdit()">
+    <section
+      class="modal"
+      aria-labelledby="edit-product-title"
+      aria-modal="true"
+      role="dialog"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Edit product</p>
+          <h2 class="modal__title" id="edit-product-title">Update details</h2>
+        </div>
+
+        <p class="modal__description">Adjust the product content and media.</p>
+      </div>
+
+      <form class="modal__form" #editForm="ngForm" (ngSubmit)="saveProduct()">
+        <label class="field">
+          <span class="field__label">Product name</span>
+          <input
+            class="field__input"
+            [(ngModel)]="selectedProduct.name"
+            maxlength="120"
+            name="name"
+            required
+            type="text"
+          />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Price</span>
+          <input
+            class="field__input"
+            [(ngModel)]="selectedProduct.price"
+            min="0"
+            name="price"
+            required
+            step="0.01"
+            type="number"
+          />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Description</span>
+          <textarea
+            class="field__textarea"
+            [(ngModel)]="selectedProduct.description"
+            name="description"
+            rows="4"
+          ></textarea>
+        </label>
+
+        <label class="field">
+          <span class="field__label">Image URL</span>
+          <input
+            class="field__input"
+            [(ngModel)]="selectedProduct.imageUrl"
+            name="imageUrl"
+            type="url"
+          />
+        </label>
+
+        <div class="modal__actions">
+          <button
+            type="button"
+            class="button button--ghost"
+            (click)="closeEdit()"
+            [disabled]="isSaving"
+          >
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="button button--primary"
+            [disabled]="editForm.invalid || isSaving"
+          >
+            {{ isSaving ? 'Saving...' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </div>
+}
+
+@if (isDeleteModalOpen) {
+  <div class="modal-backdrop" (click)="closeDeleteModal()">
+    <section
+      class="modal"
+      aria-labelledby="delete-product-title"
+      aria-modal="true"
+      role="dialog"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="modal__header">
+        <div>
+          <p class="modal__eyebrow">Delete product</p>
+          <h2 class="modal__title" id="delete-product-title">
+            Remove this item?
+          </h2>
+        </div>
+      </div>
+
+      <p class="modal__warning">
+        This action permanently removes the product from the catalogue.
+      </p>
+
+      <div class="modal__actions">
+        <button
+          type="button"
+          class="button button--ghost"
+          (click)="closeDeleteModal()"
+          [disabled]="isDeleting"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="button"
+          class="button button--danger"
+          (click)="confirmDelete()"
+          [disabled]="isDeleting"
+        >
+          {{ isDeleting ? 'Deleting...' : 'Delete product' }}
+        </button>
+      </div>
+    </section>
+  </div>
+}

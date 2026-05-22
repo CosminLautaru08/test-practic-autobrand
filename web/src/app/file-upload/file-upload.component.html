@@ -1,0 +1,52 @@
+@if (showToast) {
+  <aside
+    class="catalog-toast upload-panel__toast"
+    [class.upload-panel__toast--error]="toastTone === 'error'"
+    [attr.aria-live]="toastTone === 'error' ? 'assertive' : 'polite'"
+    [attr.role]="toastTone === 'error' ? 'alert' : 'status'"
+  >
+    <span class="catalog-toast__dot"></span>
+    <span>{{ toastMessage }}</span>
+  </aside>
+}
+
+<section class="upload-panel" aria-labelledby="invoice-upload-title">
+  <div class="upload-panel__layout">
+    <div class="upload-panel__copy">
+      <p class="upload-panel__eyebrow">Invoice processing</p>
+      <h2 class="upload-panel__title" id="invoice-upload-title">
+        Upload a PDF invoice and download the CSV result.
+      </h2>
+      <p class="upload-panel__description">
+        Select a PDF file, send it to the backend, and the generated CSV is
+        downloaded automatically.
+      </p>
+    </div>
+
+    <div class="upload-panel__controls">
+      <label
+        class="upload-panel__picker"
+        [class.upload-panel__picker--selected]="selectedFile"
+        [class.upload-panel__picker--disabled]="isUploading"
+      >
+        <input
+          #fileInput
+          accept=".pdf,application/pdf"
+          type="file"
+          [disabled]="isUploading"
+          (change)="onFileSelected($event)"
+        />
+        <span>{{ selectedFile?.name || 'Choose PDF invoice' }}</span>
+      </label>
+
+      <button
+        type="button"
+        class="button button--primary"
+        [disabled]="!selectedFile || isUploading"
+        (click)="uploadInvoice()"
+      >
+        {{ isUploading ? 'Uploading...' : 'Upload invoice' }}
+      </button>
+    </div>
+  </div>
+</section>

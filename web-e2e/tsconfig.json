@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "types": ["node", "express"],
     "allowJs": true,
     "outDir": "out-tsc/playwright",
     "sourceMap": false,

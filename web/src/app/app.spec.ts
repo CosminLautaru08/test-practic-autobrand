@@ -1,3 +1,4 @@
+import { provideHttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
@@ -9,6 +10,7 @@ describe('App', () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideHttpClient(),
         provideRouter([]),
         {
           provide: ProductService,
@@ -19,7 +21,7 @@ describe('App', () => {
                 total: 0,
                 page: 1,
                 limit: 6,
-                totalPages: 0,
+                lastPage: 1,
               }),
           },
         },

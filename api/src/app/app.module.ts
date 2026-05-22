@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { ProductModule } from './product/product.module';
 import { ScheduledTasksModule } from './scheduled-tasks/scheduled-tasks.module';
 import { ScraperModule } from './scraper/scraper.module';
+import { InvoiceModule } from './invoice/invoice.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ScraperModule } from './scraper/scraper.module';
     ProductModule,
     ScraperModule,
     ScheduledTasksModule,
+    InvoiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

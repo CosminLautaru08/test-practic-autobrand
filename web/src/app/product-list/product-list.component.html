@@ -7,9 +7,18 @@
   }
 
   <div class="catalog__shell">
+    <app-file-upload></app-file-upload>
+
     <section class="hero">
       <div class="hero__copy">
         <p class="hero__eyebrow">Product inventory</p>
+        <h1 class="hero__title">
+          A cleaner space for reviewing every imported product.
+        </h1>
+        <p class="hero__description">
+          Browse the stored catalogue, update product details, and remove
+          outdated items from one place.
+        </p>
         <p class="hero__summary">
           @if (hasProducts) {
             {{ pageStart }}-{{ pageEnd }} of {{ totalItems }} products available

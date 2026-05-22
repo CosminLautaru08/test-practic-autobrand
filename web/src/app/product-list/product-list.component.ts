@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
+import { FileUploadComponent } from '../file-upload/file-upload.component';
 import { Product } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
 import { ProductService } from '../services/product-service';
@@ -17,7 +18,7 @@ import { ProductService } from '../services/product-service';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CurrencyPipe, FormsModule],
+  imports: [CurrencyPipe, FormsModule, FileUploadComponent],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

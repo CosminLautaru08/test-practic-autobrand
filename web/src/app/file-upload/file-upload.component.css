@@ -1,0 +1,138 @@
+:host {
+  display: block;
+  margin-bottom: 24px;
+}
+
+.upload-panel {
+  display: grid;
+  gap: 16px;
+  padding: clamp(20px, 3vw, 28px);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+.upload-panel__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) auto;
+  gap: 20px;
+  align-items: end;
+}
+
+.upload-panel__eyebrow {
+  margin: 0 0 10px;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.upload-panel__title {
+  margin: 0;
+  max-width: 16ch;
+  color: var(--text-strong);
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.upload-panel__description {
+  margin: 0;
+  color: var(--text-base);
+  line-height: 1.65;
+}
+
+.upload-panel__description {
+  margin-top: 12px;
+  max-width: 56ch;
+}
+
+.upload-panel__controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.upload-panel__picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: min(280px, 100%);
+  padding: 12px 18px;
+  border: 1px dashed rgba(69, 99, 86, 0.42);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  color: var(--text-strong);
+  font-weight: 600;
+  text-align: center;
+  transition:
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.upload-panel__picker:hover {
+  transform: translateY(-1px);
+}
+
+.upload-panel__picker--selected {
+  border-style: solid;
+  border-color: var(--accent);
+}
+
+.upload-panel__picker--disabled {
+  opacity: 0.72;
+}
+
+.upload-panel__picker input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-panel__picker input:disabled {
+  cursor: not-allowed;
+}
+
+.upload-panel__toast {
+  z-index: 35;
+}
+
+.upload-panel__toast--error {
+  background: rgba(190, 93, 85, 0.96);
+}
+
+.upload-panel__toast--error .catalog-toast__dot {
+  background: #ffe3dc;
+}
+
+@media (max-width: 900px) {
+  .upload-panel__layout {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .upload-panel__controls {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 640px) {
+  .upload-panel__controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-panel__picker,
+  .upload-panel__controls .button {
+    width: 100%;
+  }
+}

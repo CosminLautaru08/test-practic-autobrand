@@ -1,0 +1,7 @@
+{
+  "json.schemas": [],
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
+}

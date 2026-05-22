@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductModule } from './product/product.module';
+import { ScheduledTasksModule } from './scheduled-tasks/scheduled-tasks.module';
 import { ScraperModule } from './scraper/scraper.module';
 
 @Module({
@@ -13,8 +15,10 @@ import { ScraperModule } from './scraper/scraper.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    ScheduleModule.forRoot(),
     ProductModule,
     ScraperModule,
+    ScheduledTasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

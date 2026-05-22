@@ -48,7 +48,6 @@ export class ScraperService {
 
       const products = await page.$$eval('.product', (items) => {
         return items.map((item) => {
-          console.log('item', item);
           const name = item.querySelector('h3 a')?.textContent?.trim() || '';
 
           const price = item.querySelector('.price')?.textContent?.trim() || '';
@@ -66,7 +65,6 @@ export class ScraperService {
           };
         });
       });
-      console.log('products', products);
       for (const product of products) {
         await this.productService.upsertFromScraper(product);
       }

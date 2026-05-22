@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -16,7 +16,7 @@ import { ProductService } from '../services/product-service';
 @Component({
   selector: 'app-product-list',
   standalone: true,
-  imports: [CurrencyPipe, DatePipe, FormsModule],
+  imports: [CurrencyPipe, FormsModule],
   templateUrl: './product-list.component.html',
   styleUrl: './product-list.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

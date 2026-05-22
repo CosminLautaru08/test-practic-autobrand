@@ -10,6 +10,13 @@
     <section class="hero">
       <div class="hero__copy">
         <p class="hero__eyebrow">Product inventory</p>
+        <p class="hero__summary">
+          @if (hasProducts) {
+            {{ pageStart }}-{{ pageEnd }} of {{ totalItems }} products available
+          } @else {
+            No products available yet
+          }
+        </p>
       </div>
 
       <div class="hero__stats">
@@ -91,18 +98,6 @@
                     'No description has been added for this product yet.'
                 }}
               </p>
-
-              <dl class="product-card__meta">
-                <div>
-                  <dt>Updated</dt>
-                  <dd>{{ product.updatedAt | date: 'mediumDate' }}</dd>
-                </div>
-
-                <div>
-                  <dt>Status</dt>
-                  <dd>Ready to review</dd>
-                </div>
-              </dl>
 
               <div class="product-card__actions">
                 <button

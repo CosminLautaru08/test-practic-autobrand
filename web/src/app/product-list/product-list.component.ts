@@ -9,6 +9,7 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { finalize } from 'rxjs';
 import { Product } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
 import { ProductService } from '../services/product-service';
@@ -59,6 +60,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   toastMessage = '';
   showToast = false;
+  fieldErrors: Record<string, string> = {};
 
   ngOnInit(): void {
     this.loadProducts();
@@ -149,6 +151,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   openEdit(product: Product): void {
     this.selectedProduct = { ...product };
+    this.fieldErrors = {};
     this.isEditModalOpen = true;
   }
 
@@ -171,19 +174,32 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
     this.isSaving = true;
 
-    this.productService.update(cleanedProduct.id, cleanedProduct).subscribe({
-      next: () => {
-        this.isSaving = false;
-        this.isEditModalOpen = false;
-        this.selectedProduct = null;
-        this.loadProducts();
-        this.showToastMessage('Product updated successfully.');
-      },
-      error: () => {
-        this.isSaving = false;
-        this.showToastMessage('Unable to save product changes.');
-      },
-    });
+    this.productService
+      .update(cleanedProduct.id, cleanedProduct)
+      .pipe(
+        finalize(() => {
+          this.isSaving = false;
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.isEditModalOpen = false;
+          this.selectedProduct = null;
+          this.loadProducts();
+          this.showToastMessage('Product updated successfully.');
+        },
+        error: (err) => {
+          console.error('Error updating product:', err);
+          const message =
+            err?.error?.message || 'Unable to save product changes.';
+          if (err.status === 409) {
+            this.fieldErrors['name'] = message; // 👈 attach to field
+          } else {
+            this.showToastMessage(message);
+          }
+          this.showToastMessage(message);
+        },
+      });
   }
 
   closeEdit(): void {
@@ -247,12 +263,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
 
   showToastMessage(message: string): void {
     this.clearToastTimer();
+
     this.toastMessage = message;
     this.showToast = true;
 
+    this.cdr.markForCheck(); // ✅ force UI update
+
     this.toastTimeoutId = setTimeout(() => {
       this.showToast = false;
-      this.toastTimeoutId = undefined;
+      this.cdr.markForCheck(); // ✅ IMPORTANT
     }, 2500);
   }
 

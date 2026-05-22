@@ -163,12 +163,7 @@
       (click)="$event.stopPropagation()"
     >
       <div class="modal__header">
-        <div>
-          <p class="modal__eyebrow">Edit product</p>
-          <h2 class="modal__title" id="edit-product-title">Update details</h2>
-        </div>
-
-        <p class="modal__description">Adjust the product content and media.</p>
+        <p class="modal__eyebrow">Edit product</p>
       </div>
 
       <form class="modal__form" #editForm="ngForm" (ngSubmit)="saveProduct()">
@@ -181,7 +176,13 @@
             name="name"
             required
             type="text"
+            [class.field__input--error]="fieldErrors['name']"
           />
+          @if (fieldErrors['name']) {
+            <p class="field__error">
+              {{ fieldErrors['name'] }}
+            </p>
+          }
         </label>
 
         <label class="field">

@@ -95,7 +95,11 @@
 .product-card__media {
   position: relative;
   aspect-ratio: 5 / 4;
-  background: linear-gradient(135deg, rgba(95, 127, 114, 0.12), rgba(23, 32, 38, 0.04));
+  background: linear-gradient(
+    135deg,
+    rgba(95, 127, 114, 0.12),
+    rgba(23, 32, 38, 0.04)
+  );
 }
 
 .product-card__image {
@@ -188,4 +192,15 @@
   .product-card__price {
     text-align: left;
   }
+}
+.field__input--error {
+  border: 1px solid #e53935;
+  background: #fff5f5;
+}
+
+.field__error {
+  color: #e53935;
+  font-size: 12px;
+  margin-top: 4px;
+  margin-left: 4px;
 }

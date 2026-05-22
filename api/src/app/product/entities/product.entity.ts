@@ -9,6 +9,15 @@ export class ProductEntity extends BaseEntity {
   @Column('float')
   price: number;
 
+  @Column({ length: 3, default: 'RON' })
+  currency: string;
+
+  @Column('float', { default: 1 })
+  exchangeRate: number;
+
+  @Column('float', { default: 0 })
+  priceRon: number;
+
   @Column('text')
   description: string;
 

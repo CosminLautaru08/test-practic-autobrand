@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 import { ProductEntity } from '../product/entities/product.entity';
 import { ProductModule } from '../product/product.module';
 import { ProductService } from '../product/product.service';
@@ -10,6 +11,7 @@ import { ScheduledTasksService } from './scheduled-tasks.service';
 
 @Module({
   imports: [
+    ExchangeRateModule,
     TypeOrmModule.forFeature([ProductEntity]),
     ScraperModule,
     ProductModule,

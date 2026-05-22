@@ -96,9 +96,20 @@
                   <h2 class="product-card__title">{{ product.name }}</h2>
                 </div>
 
-                <p class="product-card__price">
-                  {{ product.price | currency: 'EUR' : 'symbol' : '1.0-2' }}
-                </p>
+                <div class="product-card__price-block">
+                  <p class="product-card__price">
+                    {{
+                      product.price
+                        | currency: product.currency : 'symbol' : '1.0-2'
+                    }}
+                  </p>
+
+                  @if (product.currency !== 'RON') {
+                    <p class="product-card__price-secondary">
+                      {{ product.priceRon | currency: 'RON' : 'symbol' : '1.0-2' }}
+                    </p>
+                  }
+                </div>
               </div>
 
               <p class="product-card__description">

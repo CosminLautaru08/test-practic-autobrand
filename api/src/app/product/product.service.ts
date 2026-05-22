@@ -1,8 +1,13 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductEntity } from './entities/product.entity';
+import { CreateProduct } from './interfaces/create-product';
 import { Not, Repository } from 'typeorm';
 import { Product, ProductList } from './interfaces/product';
 import { ProductModel } from './models/product.model';
@@ -18,7 +23,9 @@ export class ProductService {
     await this.ensureNameIsUnique(createProductDto.name);
 
     try {
-      const product = this.productRepository.create(createProductDto);
+      const product = this.productRepository.create(
+        this.applyPricingMetadata(createProductDto),
+      );
 
       return this.productRepository.save(product);
     } catch (error) {
@@ -40,7 +47,9 @@ export class ProductService {
       await this.ensureNameIsUnique(updateProductDto.name, id);
     }
 
-    const updated = Object.assign(product, updateProductDto);
+    const updated = this.applyPricingMetadata(
+      Object.assign(product, updateProductDto),
+    );
 
     try {
       return this.productRepository.save(updated);
@@ -80,17 +89,18 @@ export class ProductService {
     return product;
   }
 
-  async upsertFromScraper(product: CreateProductDto): Promise<Product> {
+  async upsertFromScraper(product: CreateProduct): Promise<Product> {
+    const normalizedProduct = this.applyPricingMetadata(product);
     const existing = await this.productRepository.findOne({
-      where: { name: product.name },
+      where: { name: normalizedProduct.name },
     });
 
     if (existing) {
-      const updated = Object.assign(existing, product);
+      const updated = Object.assign(existing, normalizedProduct);
       return this.productRepository.save(updated);
     }
 
-    const newProduct = this.productRepository.create(product);
+    const newProduct = this.productRepository.create(normalizedProduct);
     return this.productRepository.save(newProduct);
   }
 
@@ -121,6 +131,53 @@ export class ProductService {
       throw new Error('Product not found');
     }
     return product;
+  }
+
+  private applyPricingMetadata<T extends CreateProductDto | ProductModel>(
+    product: T,
+  ): T {
+    const price = this.normalizeAmount(product.price);
+    const currency = this.normalizeCurrency(product.currency);
+
+    if (currency === 'RON') {
+      return Object.assign(product, {
+        price,
+        currency,
+        exchangeRate: 1,
+        priceRon: price,
+      });
+    }
+
+    if (
+      typeof product.exchangeRate !== 'number' ||
+      Number.isNaN(product.exchangeRate) ||
+      product.exchangeRate <= 0
+    ) {
+      throw new BadRequestException(
+        `Exchange rate is required when currency is ${currency}.`,
+      );
+    }
+
+    const exchangeRate = this.normalizeExchangeRate(product.exchangeRate);
+
+    return Object.assign(product, {
+      price,
+      currency,
+      exchangeRate,
+      priceRon: this.normalizeAmount(price * exchangeRate),
+    });
+  }
+
+  private normalizeCurrency(currency?: string): string {
+    return currency?.trim().toUpperCase() || 'RON';
+  }
+
+  private normalizeAmount(value: number): number {
+    return Number(value.toFixed(2));
+  }
+
+  private normalizeExchangeRate(value: number): number {
+    return Number(value.toFixed(4));
   }
   //#endregion
 }

@@ -152,6 +152,19 @@
   text-align: right;
 }
 
+.product-card__price-block {
+  display: grid;
+  gap: 4px;
+}
+
+.product-card__price-secondary {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-align: right;
+}
+
 .product-card__description {
   display: -webkit-box;
   min-height: 48px;
@@ -190,6 +203,10 @@
   }
 
   .product-card__price {
+    text-align: left;
+  }
+
+  .product-card__price-secondary {
     text-align: left;
   }
 }

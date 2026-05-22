@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ExchangeRateModule } from '../exchange-rate/exchange-rate.module';
 import { ScraperService } from './scraper.service';
 import { ScraperController } from './scraper.controller';
 import { ProductModule } from '../product/product.module';
@@ -7,7 +8,11 @@ import { ProductEntity } from '../product/entities/product.entity';
 import { ProductService } from '../product/product.service';
 
 @Module({
-  imports: [ProductModule, TypeOrmModule.forFeature([ProductEntity])],
+  imports: [
+    ExchangeRateModule,
+    ProductModule,
+    TypeOrmModule.forFeature([ProductEntity]),
+  ],
   controllers: [ScraperController],
   providers: [ScraperService, ProductService],
 })

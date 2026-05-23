@@ -1,11 +1,21 @@
-export interface Product {
-  id: number;
+export interface ProductWritePayload {
   name: string;
   price: number;
+  description: string;
+  imageUrl: string;
+  currency?: string;
+  exchangeRate?: number;
+  priceRon?: number;
+}
+
+export type Product = Omit<
+  ProductWritePayload,
+  'currency' | 'exchangeRate' | 'priceRon'
+> & {
+  id: number;
   currency: string;
   exchangeRate: number;
   priceRon: number;
-  description: string;
-  imageUrl: string;
+  createdAt: string;
   updatedAt: string;
-}
+};

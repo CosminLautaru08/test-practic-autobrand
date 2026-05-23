@@ -8,7 +8,7 @@
       class="bg-gradient-to-r from-slate-950 via-slate-900 to-emerald-950 px-6 py-6 text-white sm:px-8"
     >
       <div
-        class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between"
+        class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between"
       >
         <div class="space-y-3">
           <a
@@ -21,15 +21,15 @@
             <h1 class="font-['Fraunces'] text-3xl leading-tight text-white">
               Protected catalogue dashboard
             </h1>
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Product editing, invoice upload and scraper actions now require a
-              valid authenticated session.
-            </p>
           </div>
         </div>
 
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div class="rounded-2xl border border-white/10 bg-white/10 px-4 py-3">
+        <div
+          class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-stretch lg:self-center"
+        >
+          <div
+            class="flex min-h-[4.75rem] min-w-[11.5rem] flex-1 flex-col justify-center rounded-2xl border border-white/10 bg-white/10 px-4 py-3"
+          >
             <p class="text-xs uppercase tracking-[0.24em] text-slate-300">
               Signed in as
             </p>
@@ -40,10 +40,13 @@
 
           <button
             type="button"
-            class="inline-flex items-center justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+            class="flex min-h-[4.75rem] min-w-[11.5rem] flex-1 flex-col justify-center rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-left text-white transition hover:bg-white/15 sm:text-center"
             (click)="logout()"
           >
-            Logout
+            <span class="text-xs uppercase tracking-[0.24em] text-slate-300">
+              Session
+            </span>
+            <span class="mt-1 text-base font-semibold text-white">Logout</span>
           </button>
         </div>
       </div>

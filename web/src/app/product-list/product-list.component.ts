@@ -11,9 +11,11 @@ import {
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { FileUploadComponent } from '../file-upload/file-upload.component';
-import { Product } from '../interfaces/product';
+import { Product, ProductWritePayload } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
 import { ProductService } from '../services/product-service';
+
+type EditableProduct = ProductWritePayload & Pick<Product, 'id'>;
 
 @Component({
   selector: 'app-product-list',
@@ -47,14 +49,14 @@ export class ProductListComponent implements OnInit, OnDestroy {
   )}`;
 
   products: Product[] = [];
-  selectedProduct: Product | null = null;
+  selectedProduct: EditableProduct | null = null;
 
   page = 1;
   totalPages = 0;
   totalItems = 0;
 
   nameFilter = '';
-  sortField: string = '';
+  sortField = '';
   sortOrder: 'DESC' | 'ASC' = 'DESC';
 
   isLoading = false;
@@ -120,7 +122,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       page: this.page,
       limit: this.pageSize,
       name: this.nameFilter || undefined,
-      sortField: this.sortField || undefined,
+      sortField: this.sortField || 'id',
       sortOrder: this.sortField ? this.sortOrder : undefined,
     };
 
@@ -200,7 +202,27 @@ export class ProductListComponent implements OnInit, OnDestroy {
   }
 
   openEdit(product: Product): void {
-    this.selectedProduct = { ...product };
+    const {
+      id,
+      name,
+      price,
+      currency,
+      exchangeRate,
+      priceRon,
+      description,
+      imageUrl,
+    } = product;
+
+    this.selectedProduct = {
+      id,
+      name,
+      price,
+      currency,
+      exchangeRate,
+      priceRon,
+      description,
+      imageUrl,
+    };
     this.fieldErrors = {};
     this.isEditModalOpen = true;
   }
@@ -210,11 +232,23 @@ export class ProductListComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const cleanedProduct = {
+    this.fieldErrors = {};
+
+    const cleanedProduct: EditableProduct = {
       ...this.selectedProduct,
       name: this.selectedProduct.name.trim(),
       description: this.selectedProduct.description.trim(),
       imageUrl: this.selectedProduct.imageUrl.trim(),
+    };
+
+    const payload: ProductWritePayload = {
+      name: cleanedProduct.name,
+      price: cleanedProduct.price,
+      description: cleanedProduct.description,
+      imageUrl: cleanedProduct.imageUrl,
+      currency: cleanedProduct.currency,
+      exchangeRate: cleanedProduct.exchangeRate,
+      priceRon: cleanedProduct.priceRon,
     };
 
     if (!cleanedProduct.name || cleanedProduct.price < 0) {
@@ -225,7 +259,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.isSaving = true;
 
     this.productService
-      .update(cleanedProduct.id, cleanedProduct)
+      .update(cleanedProduct.id, payload)
       .pipe(
         finalize(() => {
           this.isSaving = false;
@@ -240,14 +274,15 @@ export class ProductListComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           console.error('Error updating product:', err);
-          const message =
-            err?.error?.message || 'Unable to save product changes.';
+          const message = Array.isArray(err?.error?.message)
+            ? err.error.message.join(', ')
+            : err?.error?.message || 'Unable to save product changes.';
           if (err.status === 409) {
             this.fieldErrors['name'] = message; // 👈 attach to field
           } else {
             this.showToastMessage(message);
           }
-          this.showToastMessage(message);
+          this.cdr.markForCheck();
         },
       });
   }

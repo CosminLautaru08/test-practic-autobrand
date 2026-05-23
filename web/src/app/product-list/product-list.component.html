@@ -59,7 +59,11 @@
         (click)="onSortChange('name')"
       >
         Sort by Name
-        <span class="sort-btn__dir">
+        <span
+          class="sort-btn__dir"
+          [class.sort-btn__dir--visible]="sortField === 'name'"
+          [attr.aria-hidden]="sortField === 'name' ? null : 'true'"
+        >
           {{ sortOrder }}
         </span>
       </button>
@@ -67,7 +71,7 @@
       <button type="button" (click)="clearFilters()">Clear</button>
     </div>
 
-    @if (isLoading) {
+    @if (isLoading && !hasProducts) {
       <section class="state-panel state-panel--loading" aria-live="polite">
         <div class="state-panel__pulse" aria-hidden="true"></div>
         <h2>Loading products</h2>
@@ -91,7 +95,12 @@
         </div>
       </section>
     } @else {
-      <section class="product-grid" aria-label="Product list">
+      <section
+        class="product-grid"
+        [class.product-grid--loading]="isLoading"
+        [attr.aria-busy]="isLoading"
+        aria-label="Product list"
+      >
         @for (product of products; track product.id) {
           <article class="product-card">
             <div class="product-card__media">

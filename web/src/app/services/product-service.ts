@@ -1,8 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from '../core/api.config';
-import { Product } from '../interfaces/product';
+import { Product, ProductWritePayload } from '../interfaces/product';
 import { ProductList } from '../interfaces/product-list';
 import { ProductPagination } from '../interfaces/product-pagination';
 
@@ -11,8 +11,7 @@ import { ProductPagination } from '../interfaces/product-pagination';
 })
 export class ProductService {
   private readonly baseUrl = `${API_BASE_URL}/product`;
-
-  constructor(private http: HttpClient) {}
+  private readonly http = inject(HttpClient);
 
   getAll(params: ProductPagination): Observable<ProductList> {
     let httpParams = new HttpParams();
@@ -32,11 +31,11 @@ export class ProductService {
     return this.http.get<Product>(`${this.baseUrl}/${id}`);
   }
 
-  create(product: Product): Observable<Product> {
+  create(product: ProductWritePayload): Observable<Product> {
     return this.http.post<Product>(this.baseUrl, product);
   }
 
-  update(id: number, product: Partial<Product>): Observable<Product> {
+  update(id: number, product: ProductWritePayload): Observable<Product> {
     return this.http.patch<Product>(`${this.baseUrl}/${id}`, product);
   }
 

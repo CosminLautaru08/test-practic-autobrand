@@ -362,3 +362,8 @@
 .sort-btn:active {
   transform: scale(0.98);
 }
+
+.modal-frame {
+  width: min(600px, 100%);
+  padding: clamp(10px, 1.8vw, 18px);
+}

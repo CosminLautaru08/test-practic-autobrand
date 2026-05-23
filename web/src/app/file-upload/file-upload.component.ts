@@ -244,7 +244,7 @@ export class FileUploadComponent implements OnDestroy {
         return null;
       }
 
-      if (/^[\[{]/.test(text)) {
+      if (/^[[{]/.test(text)) {
         try {
           return this.extractMessageFromPayload(JSON.parse(text));
         } catch {

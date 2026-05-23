@@ -1,5 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  inject,
+} from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -17,6 +22,7 @@ export class LoginComponent {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly loginForm = this.formBuilder.nonNullable.group({
     username: ['', [Validators.required, Validators.maxLength(64)]],
@@ -35,7 +41,7 @@ export class LoginComponent {
     const redirectTo =
       this.route.snapshot.queryParamMap.get('redirectTo') || '/';
 
-    this.errorMessage = '';
+    this.clearAuthErrorState();
     this.isSubmitting = true;
 
     this.authService
@@ -43,6 +49,7 @@ export class LoginComponent {
       .pipe(
         finalize(() => {
           this.isSubmitting = false;
+          this.cdr.markForCheck();
         }),
       )
       .subscribe({
@@ -51,6 +58,17 @@ export class LoginComponent {
         },
         error: (error: HttpErrorResponse) => {
           this.errorMessage = this.getErrorMessage(error);
+
+          if (error.status === 401) {
+            const passwordControl = this.loginForm.controls.password;
+            passwordControl.setErrors({
+              ...(passwordControl.errors ?? {}),
+              invalidCredentials: true,
+            });
+            passwordControl.markAsTouched();
+          }
+
+          this.cdr.markForCheck();
         },
       });
   }
@@ -59,6 +77,38 @@ export class LoginComponent {
     const control = this.loginForm.controls[controlName];
 
     return control.invalid && (control.dirty || control.touched);
+  }
+
+  clearAuthErrorState(): void {
+    this.errorMessage = '';
+
+    const passwordControl = this.loginForm.controls.password;
+    const passwordErrors = passwordControl.errors;
+
+    if (!passwordErrors?.['invalidCredentials']) {
+      return;
+    }
+
+    const { invalidCredentials, ...remainingErrors } = passwordErrors;
+
+    void invalidCredentials;
+    passwordControl.setErrors(
+      Object.keys(remainingErrors).length > 0 ? remainingErrors : null,
+    );
+  }
+
+  getPasswordErrorMessage(): string {
+    const passwordControl = this.loginForm.controls.password;
+
+    if (passwordControl.errors?.['required']) {
+      return 'Password is required.';
+    }
+
+    if (passwordControl.errors?.['invalidCredentials']) {
+      return 'Wrong password. Please try again.';
+    }
+
+    return '';
   }
 
   private getErrorMessage(error: HttpErrorResponse): string {

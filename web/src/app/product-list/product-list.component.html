@@ -203,134 +203,146 @@
 </div>
 
 @if (isEditModalOpen && selectedProduct) {
-  <div class="modal-backdrop" (click)="closeEdit()">
-    <section
-      class="modal"
-      aria-labelledby="edit-product-title"
-      aria-modal="true"
-      role="dialog"
-      (click)="$event.stopPropagation()"
-    >
-      <div class="modal__header">
-        <p class="modal__eyebrow">Edit product</p>
-      </div>
+  <div
+    class="modal-backdrop"
+    (pointercancel)="cancelEditBackdropDismiss()"
+    (pointerdown)="startEditBackdropDismiss($event)"
+    (pointerup)="finishEditBackdropDismiss($event)"
+  >
+    <div class="modal-frame">
+      <section
+        class="modal"
+        aria-labelledby="edit-product-title"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div class="modal__header">
+          <p class="modal__eyebrow">Edit product</p>
+        </div>
 
-      <form class="modal__form" #editForm="ngForm" (ngSubmit)="saveProduct()">
-        <label class="field">
-          <span class="field__label">Product name</span>
-          <input
-            class="field__input"
-            [(ngModel)]="selectedProduct.name"
-            maxlength="120"
-            name="name"
-            required
-            type="text"
-            [class.field__input--error]="fieldErrors['name']"
-          />
-          @if (fieldErrors['name']) {
-            <p class="field__error">
-              {{ fieldErrors['name'] }}
-            </p>
-          }
-        </label>
+        <form class="modal__form" #editForm="ngForm" (ngSubmit)="saveProduct()">
+          <label class="field">
+            <span class="field__label">Product name</span>
+            <input
+              class="field__input"
+              [(ngModel)]="selectedProduct.name"
+              maxlength="120"
+              name="name"
+              required
+              type="text"
+              [class.field__input--error]="fieldErrors['name']"
+            />
+            @if (fieldErrors['name']) {
+              <p class="field__error">
+                {{ fieldErrors['name'] }}
+              </p>
+            }
+          </label>
 
-        <label class="field">
-          <span class="field__label">Price</span>
-          <input
-            class="field__input"
-            [(ngModel)]="selectedProduct.price"
-            min="0"
-            name="price"
-            required
-            step="0.01"
-            type="number"
-          />
-        </label>
+          <label class="field">
+            <span class="field__label">Price</span>
+            <input
+              class="field__input"
+              [(ngModel)]="selectedProduct.price"
+              min="0"
+              name="price"
+              required
+              step="0.01"
+              type="number"
+            />
+          </label>
 
-        <label class="field">
-          <span class="field__label">Description</span>
-          <textarea
-            class="field__textarea"
-            [(ngModel)]="selectedProduct.description"
-            name="description"
-            rows="4"
-          ></textarea>
-        </label>
+          <label class="field">
+            <span class="field__label">Description</span>
+            <textarea
+              class="field__textarea"
+              [(ngModel)]="selectedProduct.description"
+              name="description"
+              rows="4"
+            ></textarea>
+          </label>
 
-        <label class="field">
-          <span class="field__label">Image URL</span>
-          <input
-            class="field__input"
-            [(ngModel)]="selectedProduct.imageUrl"
-            name="imageUrl"
-            type="url"
-          />
-        </label>
+          <label class="field">
+            <span class="field__label">Image URL</span>
+            <input
+              class="field__input"
+              [(ngModel)]="selectedProduct.imageUrl"
+              name="imageUrl"
+              type="url"
+            />
+          </label>
+
+          <div class="modal__actions">
+            <button
+              type="button"
+              class="button button--ghost"
+              (click)="closeEdit()"
+              [disabled]="isSaving"
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              class="button button--primary"
+              [disabled]="editForm.invalid || isSaving"
+            >
+              {{ isSaving ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+}
+
+@if (isDeleteModalOpen) {
+  <div
+    class="modal-backdrop"
+    (pointercancel)="cancelDeleteBackdropDismiss()"
+    (pointerdown)="startDeleteBackdropDismiss($event)"
+    (pointerup)="finishDeleteBackdropDismiss($event)"
+  >
+    <div class="modal-frame">
+      <section
+        class="modal"
+        aria-labelledby="delete-product-title"
+        aria-modal="true"
+        role="dialog"
+      >
+        <div class="modal__header">
+          <div>
+            <p class="modal__eyebrow">Delete product</p>
+            <h2 class="modal__title" id="delete-product-title">
+              Remove this item?
+            </h2>
+          </div>
+        </div>
+
+        <p class="modal__warning">
+          This action permanently removes the product from the catalogue.
+        </p>
 
         <div class="modal__actions">
           <button
             type="button"
             class="button button--ghost"
-            (click)="closeEdit()"
-            [disabled]="isSaving"
+            (click)="closeDeleteModal()"
+            [disabled]="isDeleting"
           >
             Cancel
           </button>
 
           <button
-            type="submit"
-            class="button button--primary"
-            [disabled]="editForm.invalid || isSaving"
+            type="button"
+            class="button button--danger"
+            (click)="confirmDelete()"
+            [disabled]="isDeleting"
           >
-            {{ isSaving ? 'Saving...' : 'Save changes' }}
+            {{ isDeleting ? 'Deleting...' : 'Delete product' }}
           </button>
         </div>
-      </form>
-    </section>
-  </div>
-}
-
-@if (isDeleteModalOpen) {
-  <div class="modal-backdrop" (click)="closeDeleteModal()">
-    <section
-      class="modal"
-      aria-labelledby="delete-product-title"
-      aria-modal="true"
-      role="dialog"
-      (click)="$event.stopPropagation()"
-    >
-      <div class="modal__header">
-        <div>
-          <p class="modal__eyebrow">Delete product</p>
-          <h2 class="modal__title" id="delete-product-title">
-            Remove this item?
-          </h2>
-        </div>
-      </div>
-
-      <p class="modal__warning">
-        This action permanently removes the product from the catalogue.
-      </p>
-
-      <div class="modal__actions">
-        <button
-          type="button"
-          class="button button--ghost"
-          (click)="closeDeleteModal()"
-          [disabled]="isDeleting"
-        >
-          Cancel
-        </button>
-
-        <button
-          type="button"
-          class="button button--danger"
-          (click)="confirmDelete()"
-          [disabled]="isDeleting"
-        >
-          {{ isDeleting ? 'Deleting...' : 'Delete product' }}
-        </button>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 }

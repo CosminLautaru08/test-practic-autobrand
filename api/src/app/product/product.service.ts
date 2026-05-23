@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductsDto } from './dto/product-pagination';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,11 +21,13 @@ export class ProductService {
   ) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    await this.ensureNameIsUnique(createProductDto.name);
+    const normalizedProduct = this.normalizeProductInput(createProductDto);
+
+    await this.ensureNameIsUnique(normalizedProduct.name);
 
     try {
       const product = this.productRepository.create(
-        this.applyPricingMetadata(createProductDto),
+        this.applyPricingMetadata(normalizedProduct),
       );
 
       return this.productRepository.save(product);
@@ -43,13 +45,14 @@ export class ProductService {
     updateProductDto: UpdateProductDto,
   ): Promise<Product> {
     const product = await this.findProduct(id);
+    const normalizedProduct = this.normalizeProductInput(updateProductDto);
 
-    if (updateProductDto.name) {
-      await this.ensureNameIsUnique(updateProductDto.name, id);
+    if (typeof normalizedProduct.name === 'string') {
+      await this.ensureNameIsUnique(normalizedProduct.name, id);
     }
 
     const updated = this.applyPricingMetadata(
-      Object.assign(product, updateProductDto),
+      Object.assign(product, normalizedProduct),
     );
 
     try {
@@ -66,20 +69,17 @@ export class ProductService {
   async findAll(body: FindProductsDto): Promise<ProductList> {
     const query = this.productRepository.createQueryBuilder('product');
 
-    // body
     if (body?.name) {
       query.andWhere('LOWER(product.name) LIKE LOWER(:name)', {
         name: `%${body.name}%`,
       });
     }
 
-    // Sorting
     const sortField = body?.sortField || 'id';
     const sortOrder = body?.sortOrder || 'DESC';
 
     query.orderBy(`product.${sortField}`, sortOrder);
 
-    // Pagination
     query.skip((body.page - 1) * body.limit).take(body.limit);
 
     const [data, total] = await query.getManyAndCount();
@@ -103,10 +103,10 @@ export class ProductService {
   }
 
   async upsertFromScraper(product: CreateProduct): Promise<Product> {
-    const normalizedProduct = this.applyPricingMetadata(product);
-    const existing = await this.productRepository.findOne({
-      where: { name: normalizedProduct.name },
-    });
+    const normalizedProduct = this.applyPricingMetadata(
+      this.normalizeProductInput(product),
+    );
+    const existing = await this.findProductByName(normalizedProduct.name);
 
     if (existing) {
       const updated = Object.assign(existing, normalizedProduct);
@@ -123,16 +123,31 @@ export class ProductService {
     name: string,
     excludeId?: number,
   ): Promise<void> {
-    const existingProduct = await this.productRepository.findOne({
-      where: {
-        name,
-        ...(excludeId ? { id: Not(excludeId) } : {}),
-      },
-    });
+    const existingProduct = await this.findProductByName(name, excludeId);
 
     if (existingProduct) {
       throw new ConflictException('Product name already exists');
     }
+  }
+
+  private findProductByName(
+    name: string,
+    excludeId?: number,
+  ): Promise<ProductEntity | null> {
+    const query = this.productRepository
+      .createQueryBuilder('product')
+      .where('LOWER(TRIM(product.name)) = LOWER(TRIM(:name))', {
+        name,
+      });
+
+    if (excludeId !== undefined) {
+      query.andWhere('product.id != :excludeId', { excludeId });
+    }
+
+    return query
+      .orderBy('product.updatedAt', 'DESC')
+      .addOrderBy('product.id', 'DESC')
+      .getOne();
   }
 
   private async findProduct(id: number): Promise<ProductModel> {
@@ -146,9 +161,7 @@ export class ProductService {
     return product;
   }
 
-  private applyPricingMetadata<T extends CreateProductDto | ProductModel>(
-    product: T,
-  ): T {
+  private applyPricingMetadata<T extends CreateProduct>(product: T): T {
     const price = this.normalizeAmount(product.price);
     const currency = this.normalizeCurrency(product.currency);
 
@@ -191,6 +204,16 @@ export class ProductService {
 
   private normalizeExchangeRate(value: number): number {
     return Number(value.toFixed(4));
+  }
+
+  private normalizeProductInput<T extends { name: string }>(product: T): T {
+    return Object.assign({}, product, {
+      name: this.normalizeProductName(product.name),
+    });
+  }
+
+  private normalizeProductName(name: string): string {
+    return name.trim();
   }
   //#endregion
 }

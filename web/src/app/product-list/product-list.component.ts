@@ -30,6 +30,8 @@ export class ProductListComponent implements OnInit, OnDestroy {
   private toastTimeoutId?: ReturnType<typeof setTimeout>;
   private cdr = inject(ChangeDetectorRef);
   private searchTimeout?: ReturnType<typeof setTimeout>;
+  private shouldCloseEditOnBackdropPointerUp = false;
+  private shouldCloseDeleteOnBackdropPointerUp = false;
 
   readonly pageSize = 6;
   readonly fallbackImage = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(
@@ -170,7 +172,6 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.sortField = field;
     this.sortOrder = newOrder;
 
-    // only reset page if needed, but avoid redundant reload logic
     if (this.page !== 1) {
       this.page = 1;
     }
@@ -224,6 +225,7 @@ export class ProductListComponent implements OnInit, OnDestroy {
       imageUrl,
     };
     this.fieldErrors = {};
+    this.cancelEditBackdropDismiss();
     this.isEditModalOpen = true;
   }
 
@@ -292,11 +294,13 @@ export class ProductListComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.cancelEditBackdropDismiss();
     this.isEditModalOpen = false;
     this.selectedProduct = null;
   }
 
   openDeleteModal(id: number): void {
+    this.cancelDeleteBackdropDismiss();
     this.deleteTargetId = id;
     this.isDeleteModalOpen = true;
   }
@@ -334,8 +338,51 @@ export class ProductListComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.cancelDeleteBackdropDismiss();
     this.isDeleteModalOpen = false;
     this.deleteTargetId = null;
+  }
+
+  startEditBackdropDismiss(event: PointerEvent): void {
+    this.shouldCloseEditOnBackdropPointerUp =
+      event.target === event.currentTarget;
+  }
+
+  finishEditBackdropDismiss(event: PointerEvent): void {
+    const shouldClose =
+      this.shouldCloseEditOnBackdropPointerUp &&
+      event.target === event.currentTarget;
+
+    this.cancelEditBackdropDismiss();
+
+    if (shouldClose) {
+      this.closeEdit();
+    }
+  }
+
+  cancelEditBackdropDismiss(): void {
+    this.shouldCloseEditOnBackdropPointerUp = false;
+  }
+
+  startDeleteBackdropDismiss(event: PointerEvent): void {
+    this.shouldCloseDeleteOnBackdropPointerUp =
+      event.target === event.currentTarget;
+  }
+
+  finishDeleteBackdropDismiss(event: PointerEvent): void {
+    const shouldClose =
+      this.shouldCloseDeleteOnBackdropPointerUp &&
+      event.target === event.currentTarget;
+
+    this.cancelDeleteBackdropDismiss();
+
+    if (shouldClose) {
+      this.closeDeleteModal();
+    }
+  }
+
+  cancelDeleteBackdropDismiss(): void {
+    this.shouldCloseDeleteOnBackdropPointerUp = false;
   }
 
   handleImageError(event: Event): void {
@@ -352,11 +399,11 @@ export class ProductListComponent implements OnInit, OnDestroy {
     this.toastMessage = message;
     this.showToast = true;
 
-    this.cdr.markForCheck(); // ✅ force UI update
+    this.cdr.markForCheck();
 
     this.toastTimeoutId = setTimeout(() => {
       this.showToast = false;
-      this.cdr.markForCheck(); // ✅ IMPORTANT
+      this.cdr.markForCheck();
     }, 2500);
   }
 

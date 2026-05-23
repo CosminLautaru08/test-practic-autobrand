@@ -1,111 +1,189 @@
-# New Nx Repository
+# Autobrand Workspace
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+Nx monorepo for a protected product catalog. The workspace combines an Angular frontend with a NestJS API, stores data in SQLite, imports products from a remote catalog, and converts uploaded PDF invoices into CSV.
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is ready ✨.
+## Workspace at a glance
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+| Project | Type | Purpose |
+| --- | --- | --- |
+| `web` | Angular app | Login flow and protected catalog dashboard |
+| `@org/api` | NestJS app | Auth, products, scraper, scheduled jobs, invoice parsing |
+| `web-e2e` | Playwright app | Frontend end-to-end test project |
+| `@org/api-e2e` | Jest app | API end-to-end test project |
 
-## Try the full Nx platform
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/setup/connect-workspace/guide). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
+## Main features
 
-## Generate a library
+- JWT-protected login with a seeded admin account
+- Product catalog listing with pagination, search, sorting, edit, and delete
+- Product persistence in `db.sqlite` through TypeORM and `better-sqlite3`
+- Product scraping from `https://www.web-scraping.dev/products?category=consumables&page=1`
+- Automatic exchange-rate normalization to RON using the ECB daily XML feed
+- PDF invoice upload that extracts line items and returns a downloadable CSV
+- Scheduled scraper execution every hour from 12:00 through 18:00 server time
 
-```sh
-npx nx g @nx/js:lib packages/pkg1 --publishable --importPath=@my-org/pkg1
-```
+## Tech stack
 
-## Run tasks
+- Nx 22
+- Angular 21
+- NestJS 11
+- TypeORM
+- SQLite via `better-sqlite3`
+- Playwright
+- Jest
 
-To build the library use:
+## Getting started
 
-```sh
-npx nx build pkg1
-```
+### Prerequisites
 
-To run any task with Nx use:
+- Node.js 20+
+- npm
 
-```sh
-npx nx <target> <project-name>
-```
-
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
-
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Versioning and releasing
-
-To version and release the library use
-
-```
-npx nx release
-```
-
-Pass `--dry-run` to see what would happen without actually releasing the library.
-
-[Learn more about Nx release &raquo;](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Keep TypeScript project references up to date
-
-Nx automatically updates TypeScript [project references](https://www.typescriptlang.org/docs/handbook/project-references.html) in `tsconfig.json` files to ensure they remain accurate based on your project dependencies (`import` or `require` statements). This sync is automatically done when running tasks such as `build` or `typecheck`, which require updated references to function correctly.
-
-To manually trigger the process to sync the project graph dependencies information to the TypeScript project references, run the following command:
+### Install dependencies
 
 ```sh
-npx nx sync
+npm install
 ```
 
-You can enforce that the TypeScript project references are always in the correct state when running in CI by adding a step to your CI job configuration that runs the following command:
+### Start the backend
 
 ```sh
-npx nx sync:check
+npm exec nx run @org/api:serve
 ```
 
-[Learn more about nx sync](https://nx.dev/reference/nx-commands#sync)
+The API starts on `http://localhost:3000/api`.
 
-## Nx Cloud
+### Start the frontend
 
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-### Set up CI (non-Github Actions CI)
-
-**Note:** This is only required if your CI provider is not GitHub Actions.
-
-Use the following command to configure a CI workflow for your workspace:
+In a second terminal:
 
 ```sh
-npx nx g ci-workflow
+npm exec nx run web:serve
 ```
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+The frontend starts on `http://localhost:4200`.
 
-## Install Nx Console
+## Default login
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+On first boot the API seeds an admin user automatically:
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- Username: `admin`
+- Password: `admin123`
 
-## Useful links
+These can be overridden with environment variables before starting the API:
 
-Learn more:
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD`
+- `JWT_SECRET`
+- `PORT`
 
-- [Learn more about this workspace setup](https://nx.dev/nx-api/js?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## Important local assumptions
 
-And join the Nx community:
+- The frontend is hardcoded to call `http://localhost:3000/api`.
+- The backend CORS policy currently allows `http://localhost:4200`.
+- The SQLite database file is `db.sqlite` at the workspace root.
+- TypeORM runs with `synchronize: true`, so schema changes are applied automatically at startup.
 
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-# test-practic-autobrand
-# test-practic-autobrand
-# test-practic-autobrand
-# test-practic-autobrand
+## Useful Nx commands
+
+### Run apps
+
+```sh
+npm exec nx run @org/api:serve
+npm exec nx run web:serve
+```
+
+### Build
+
+```sh
+npm exec nx run @org/api:build
+npm exec nx run web:build
+```
+
+### Lint
+
+```sh
+npm exec nx run @org/api:lint
+npm exec nx run web:lint
+```
+
+### Test
+
+```sh
+npm exec nx run @org/api:test
+npm exec nx run web:test
+```
+
+### End-to-end
+
+```sh
+npm exec nx run @org/api-e2e:e2e
+npm exec nx run web-e2e:e2e
+```
+
+### Inspect the workspace graph
+
+```sh
+npm exec nx graph
+```
+
+## API overview
+
+All protected routes require a Bearer token obtained from `POST /api/auth/login`.
+
+| Method | Route | Auth | Purpose |
+| --- | --- | --- | --- |
+| `GET` | `/api` | No | Basic API sanity response |
+| `POST` | `/api/auth/login` | No | Returns JWT access token |
+| `GET` | `/api/auth/profile` | Yes | Returns the authenticated user profile |
+| `GET` | `/api/product` | Yes | List products with paging, filtering, and sorting |
+| `POST` | `/api/product` | Yes | Create a product |
+| `GET` | `/api/product/:id` | Yes | Fetch one product |
+| `PATCH` | `/api/product/:id` | Yes | Update a product |
+| `DELETE` | `/api/product/:id` | Yes | Delete a product |
+| `POST` | `/api/scraper` | Yes | Run the product scraper manually |
+| `GET` | `/api/scheduled-tasks/test-cron` | Yes | Trigger the scheduled scraper handler manually |
+| `POST` | `/api/invoice/upload` | Yes | Upload a PDF invoice and download CSV output |
+
+### Product list query parameters
+
+`GET /api/product` supports:
+
+- `page`
+- `limit`
+- `name`
+- `sortField`: `id`, `name`, `price`, `createdAt`
+- `sortOrder`: `ASC`, `DESC`
+
+## Feature notes
+
+### Product catalog
+
+- Product names are normalized with trimming and enforced as unique.
+- Non-RON products require an exchange rate and also store a computed `priceRon`.
+- The Angular dashboard currently supports review, edit, delete, search, and sort.
+
+### Scraper
+
+- The scraper logs into `web-scraping.dev` with the demo credentials baked into the service.
+- It reads product listing pages, visits detail pages, extracts price and currency, converts the amount to RON, and upserts products by name.
+- Exchange rates are cached in memory for one hour.
+
+### Invoice processing
+
+- Only PDF uploads are accepted.
+- The backend parses invoice text with `pdf-parse`.
+- Extracted rows are exported as CSV with: `productCode`, `productName`, `unitPrice`, `currency`, `quantity`.
+
+## Current testing state
+
+- API unit tests exist for product, scraper, and invoice services.
+- `web-e2e` and `@org/api-e2e` are present, but their generated example specs still look like scaffold defaults and are not yet aligned with the current app behavior.
+
+## Suggested development flow
+
+1. Start `@org/api`.
+2. Start `web`.
+3. Sign in with the seeded admin account.
+4. Review products in the dashboard.
+5. Run `POST /api/scraper` if you want to populate or refresh catalog data.
+6. Upload a PDF invoice from the UI to verify CSV export.
